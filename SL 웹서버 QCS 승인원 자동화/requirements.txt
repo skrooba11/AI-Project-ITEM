@@ -1,0 +1,1 @@
+python -m pip install xlwings==0.33.12 pillow==11.1.0 pywin32==310
