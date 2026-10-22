@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SL 팩터검증템플릿 제목수정자동화</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tool.css') }}">
+<style>
+  .mp-row { display:flex; align-items:center; gap:8px; }
+  .mp-row input[type=text] { width:60px; padding:8px; border:1px solid var(--border); border-radius:4px; text-align:center; }
+  .mp-row span { font-weight:bold; }
+</style>
+</head>
+<body>
+<header><h1>SL 팩터검증템플릿 제목수정자동화</h1><a href="/">&larr; 허브로 돌아가기</a></header>
+<main>
+  <form id="gen-form" class="card">
+    <div class="field-row">
+      <label>수정할 PPTX 파일 (.pptx) *</label>
+      <input type="file" name="pptx_file" accept=".pptx" required>
+    </div>
+
+    <div class="field-row">
+      <label>MP번호 <span class="hint">(예: 24-123)</span></label>
+      <div class="mp-row">
+        <span>MP</span>
+        <input type="text" name="mp_front" maxlength="2" inputmode="numeric" placeholder="24" required>
+        <span>-</span>
+        <input type="text" name="mp_back" maxlength="3" inputmode="numeric" placeholder="123" required>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <label>품명 <span class="hint">(예: ME HL MAIN BEZEL)</span></label>
+      <input type="text" name="product_name" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:4px;" required>
+    </div>
+
+    <button type="submit" id="submit-btn" class="btn">제목 수정 &amp; 다운로드</button>
+    <div id="msg-area"></div>
+  </form>
+</main>
+
+<script src="{{ url_for('static', filename='js/upload-form.js') }}"></script>
+<script>
+const mpFront = document.querySelector('input[name="mp_front"]');
+const mpBack = document.querySelector('input[name="mp_back"]');
+[mpFront, mpBack].forEach((el) => {
+  el.addEventListener("input", () => { el.value = el.value.replace(/\D/g, ""); });
+});
+
+wireGenerateForm("gen-form", "/sl-factor-template/generate", "제목 수정 & 다운로드");
+</script>
+</body>
+</html>

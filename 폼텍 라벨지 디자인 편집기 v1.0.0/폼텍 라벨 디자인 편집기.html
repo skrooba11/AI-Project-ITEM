@@ -145,8 +145,9 @@
             height: calc(100vh - 60px);
         }
 
-        /* 왼쪽 사이드바 */
+        /* 왼쪽 사이드바 (단순화된 UI에서는 숨김 처리) */
         .sidebar {
+            display: none;
             width: 250px;
             background: #fff;
             border-right: 1px solid #ccc;
@@ -922,8 +923,6 @@
         
         <div class="toolbar-group">
             <button onclick="saveCurrentTemplate()" title="저장 (Ctrl+S)">💾 저장</button>
-            <button onclick="saveAsTemplate()" title="새 템플릿 저장 (Ctrl+Shift+T)">⭐💾 새 템플릿 저장</button>
-            <button onclick="saveAsQuickLayout()" title="새 빠른 레이아웃 저장">⚡💾 새 빠른 레이아웃 저장</button>
         </div>
     </div>
 
@@ -1265,6 +1264,29 @@
         </span>
     </div>
 
+    <!-- 금형번호 엑셀 파일 업로드 안내 모달 -->
+    <div class="modal" id="moldFileUploadModal">
+        <div class="modal-content" style="width: 420px; max-width: 90vw;">
+            <div class="modal-header">📎 금형번호.xlsm 파일 첨부</div>
+            <div class="modal-body">
+                <div style="font-size: 14px; color: #333; margin-bottom: 15px; line-height: 1.5;">
+                    금형번호.xlsm 파일을 첨부해주세요.<br>
+                    첨부하면 MK 금형번호나 MP번호를 검색만 해도<br>
+                    라벨이 바로 작성됩니다.
+                </div>
+                <input type="file" id="moldFileUploadModalInput" accept=".xlsx,.xls,.xlsm"
+                       style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px;"
+                       onchange="loadExcelFile(this); closeMoldFileUploadModal();">
+                <div style="font-size: 11px; color: #999; margin-top: 10px;">
+                    💡 지금 첨부하지 않아도 나중에 화면 왼쪽 "금형 정보" 패널에서 첨부할 수 있습니다.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeMoldFileUploadModal()">건너뛰기</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 템플릿 저장 모달 -->
     <div class="modal" id="saveTemplateModal" onclick="if(event.target === this) closeTemplateModal()">
         <div class="modal-content">
@@ -1371,7 +1393,13 @@
 
         // 템플릿 관리
         let customTemplates = [];
-        
+
+        // 내장 기본 라벨 틀 ("MK-TECH 도면출도용 라벨지_V2")
+        // 브라우저(localStorage)에 아무 데이터가 없는 첫 접속(특히 웹 서버 접속)에서도
+        // 항상 동일한 라벨 틀이 뜨도록 앱 자체에 데이터를 내장해 둔다.
+        // (localStorage는 브라우저/PC별로 완전히 분리되어 있어 서버로는 공유되지 않음)
+        const BUILTIN_BASE_TEMPLATE = {"id":1762128120430,"name":"MK-TECH 도면출도용 라벨지_V2","description":"","labels":[{"id":1,"type":"text","x":17,"y":23,"width":122,"height":36.5,"text":"금 형 명","fontSize":24,"fontFamily":"Malgun Gothic","fontWeight":"bold","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal","letterSpacing":0},{"id":2,"type":"text","x":17,"y":59.5,"width":63.5,"height":23.5,"text":"MK 금형번호","fontSize":24,"fontFamily":"Malgun Gothic","fontWeight":"bold","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal","letterSpacing":0},{"id":3,"type":"text","x":17,"y":83,"width":84.5,"height":30,"text":"SL MP번호","fontSize":24,"fontFamily":"Malgun Gothic","fontWeight":"bold","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal","letterSpacing":0},{"id":4,"type":"text","x":17,"y":118,"width":93,"height":28,"text":"제 작","fontSize":36,"fontFamily":"Malgun Gothic","fontWeight":"bold","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal","letterSpacing":0},{"id":5,"type":"text","x":17,"y":191.5,"width":63.5,"height":23.5,"text":"MK 금형번호","fontSize":24,"fontFamily":"Malgun Gothic","fontWeight":"bold","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal"},{"id":9,"type":"text","x":153,"y":25,"width":14.5,"height":10,"text":"금형번호","fontSize":8,"fontFamily":"Malgun Gothic","fontWeight":"bold","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0.5,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal","letterSpacing":0},{"id":10,"type":"text","x":153,"y":35,"width":14.5,"height":11,"text":"","fontSize":9,"fontFamily":"Malgun Gothic","fontWeight":"normal","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0.5,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal","letterSpacing":0},{"id":19,"type":"text","x":153,"y":46,"width":14.5,"height":10,"text":"생산년도","fontSize":8,"fontFamily":"Malgun Gothic","fontWeight":"bold","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0.5,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal","letterSpacing":0},{"id":20,"type":"text","x":153,"y":56,"width":14.5,"height":11,"text":"","fontSize":11,"fontFamily":"Malgun Gothic","fontWeight":"normal","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0.5,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal","letterSpacing":0},{"id":21,"type":"text","x":153,"y":67,"width":14.5,"height":10,"text":"품     명","fontSize":8,"fontFamily":"Malgun Gothic","fontWeight":"bold","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0.5,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal","letterSpacing":0},{"id":22,"type":"text","x":153,"y":237,"width":14.5,"height":10,"text":"부 서 명","fontSize":8,"fontFamily":"Malgun Gothic","fontWeight":"bold","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0.5,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal","letterSpacing":0},{"id":26,"type":"text","x":17,"y":215,"width":84.5,"height":30,"text":"SL MP번호","fontSize":24,"fontFamily":"Malgun Gothic","fontWeight":"bold","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal"},{"id":28,"type":"text","x":175,"y":67,"width":14.5,"height":10,"text":"품     명","fontSize":8,"fontFamily":"Malgun Gothic","fontWeight":"bold","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0.5,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal","letterSpacing":0},{"id":29,"type":"text","x":175,"y":56,"width":14.5,"height":11,"text":"","fontSize":11,"fontFamily":"Malgun Gothic","fontWeight":"normal","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0.5,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal","letterSpacing":0},{"id":30,"type":"text","x":175,"y":46,"width":14.5,"height":10,"text":"생산년도","fontSize":8,"fontFamily":"Malgun Gothic","fontWeight":"bold","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0.5,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal","letterSpacing":0},{"id":31,"type":"text","x":175,"y":35,"width":14.5,"height":11,"text":"","fontSize":9,"fontFamily":"Malgun Gothic","fontWeight":"normal","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0.5,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal","letterSpacing":0},{"id":32,"type":"text","x":175,"y":25,"width":14.5,"height":10,"text":"금형번호","fontSize":8,"fontFamily":"Malgun Gothic","fontWeight":"bold","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0.5,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal","letterSpacing":0},{"id":33,"type":"text","x":175,"y":237,"width":14.5,"height":10,"text":"부 서 명","fontSize":8,"fontFamily":"Malgun Gothic","fontWeight":"bold","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0.5,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal","letterSpacing":0},{"id":40,"type":"text","x":153,"y":247,"width":14.5,"height":30,"text":"제 작","fontSize":12,"fontFamily":"Malgun Gothic","fontWeight":"normal","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0.5,"borderRadius":0,"verticalAlign":"center","textDirection":"vertical","letterSpacing":3},{"id":41,"type":"text","x":17,"y":250,"width":93,"height":28,"text":"제 작","fontSize":36,"fontFamily":"Malgun Gothic","fontWeight":"bold","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal","letterSpacing":0},{"id":42,"type":"text","x":175,"y":247,"width":14.5,"height":30,"text":"제 작","fontSize":12,"fontFamily":"Malgun Gothic","fontWeight":"normal","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0.5,"borderRadius":0,"verticalAlign":"center","textDirection":"vertical","letterSpacing":3},{"id":43,"type":"text","x":17,"y":155,"width":122,"height":36.5,"text":"금 형 명","fontSize":24,"fontFamily":"Malgun Gothic","fontWeight":"bold","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal","letterSpacing":0},{"id":44,"type":"text","x":153,"y":77,"width":14.5,"height":160,"text":"금 형 명","fontSize":10,"fontFamily":"Malgun Gothic","fontWeight":"normal","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0.5,"borderRadius":0,"verticalAlign":"center","textDirection":"vertical","letterSpacing":8},{"id":45,"type":"text","x":175,"y":77,"width":14.5,"height":160,"text":"금 형 명","fontSize":10,"fontFamily":"Malgun Gothic","fontWeight":"normal","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0.5,"borderRadius":0,"verticalAlign":"center","textDirection":"vertical","letterSpacing":8}],"labelGroups":{},"groupIdCounter":5,"labelLinks":{"1":[43,44,45],"3":[26],"4":[40,41,42],"9":[32],"10":[31],"19":[30],"20":[29],"21":[28],"22":[33]},"assignedMoldNumberLabels":[{"id":10,"type":"text","x":153,"y":35,"width":14.5,"height":11,"text":"","fontSize":9,"fontFamily":"Malgun Gothic","fontWeight":"normal","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0.5,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal","letterSpacing":0},{"id":31,"type":"text","x":175,"y":35,"width":14.5,"height":11,"text":"","fontSize":9,"fontFamily":"Malgun Gothic","fontWeight":"normal","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0.5,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal","letterSpacing":0},{"id":2,"type":"text","x":17,"y":59.5,"width":63.5,"height":23.5,"text":"MK 금형번호","fontSize":24,"fontFamily":"Malgun Gothic","fontWeight":"bold","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal","letterSpacing":0},{"id":5,"type":"text","x":17,"y":191.5,"width":63.5,"height":23.5,"text":"MK 금형번호","fontSize":24,"fontFamily":"Malgun Gothic","fontWeight":"bold","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal"}],"assignedProductNameLabels":[{"id":1,"type":"text","x":20,"y":20,"width":122,"height":36.5,"text":"CD CUV PE2 RCL REFLECTOR-TAIL-CTR_LR","fontSize":24,"fontFamily":"Malgun Gothic","fontWeight":"bold","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal"},{"id":6,"type":"text","x":20,"y":153,"width":122,"height":36.5,"text":"CD CUV PE2 RCL REFLECTOR-TAIL-CTR_LR","fontSize":24,"fontFamily":"Malgun Gothic","fontWeight":"bold","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal"},{"id":15,"type":"text","x":147,"y":62,"width":15,"height":160,"text":"CD CUV PE2 RCL REFLECTOR-TAIL-CTR_LR","fontSize":13,"fontFamily":"Malgun Gothic","fontWeight":"normal","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":1,"borderRadius":0,"verticalAlign":"center","textDirection":"vertical","groupId":2},{"id":35,"type":"text","x":167.58333333320763,"y":69.7395833334433,"width":15,"height":160,"text":"CD CUV PE2 RCL REFLECTOR-TAIL-CTR_LR","fontSize":13,"fontFamily":"Malgun Gothic","fontWeight":"normal","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":1,"borderRadius":0,"verticalAlign":"center","textDirection":"vertical","letterSpacing":3.5,"groupId":4},{"id":43,"type":"text","x":17,"y":155,"width":122,"height":36.5,"text":"금 형 명","fontSize":24,"fontFamily":"Malgun Gothic","fontWeight":"bold","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal","letterSpacing":0},{"id":44,"type":"text","x":153,"y":77,"width":14.5,"height":160,"text":"금 형 명","fontSize":12,"fontFamily":"Malgun Gothic","fontWeight":"normal","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0.5,"borderRadius":0,"verticalAlign":"center","textDirection":"vertical","letterSpacing":5},{"id":45,"type":"text","x":175,"y":77,"width":14.5,"height":160,"text":"금 형 명","fontSize":12,"fontFamily":"Malgun Gothic","fontWeight":"normal","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0.5,"borderRadius":0,"verticalAlign":"center","textDirection":"vertical","letterSpacing":5}],"assignedMpNumberLabels":[{"id":26,"type":"text","x":17,"y":215,"width":84.5,"height":30,"text":"SL MP번호","fontSize":24,"fontFamily":"Malgun Gothic","fontWeight":"bold","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal"},{"id":3,"type":"text","x":17,"y":83,"width":84.5,"height":30,"text":"SL MP번호","fontSize":24,"fontFamily":"Malgun Gothic","fontWeight":"bold","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal","letterSpacing":0}],"assignedCreationYearLabels":[{"id":20,"type":"text","x":153,"y":56,"width":14.5,"height":11,"text":"","fontSize":11,"fontFamily":"Malgun Gothic","fontWeight":"normal","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0.5,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal","letterSpacing":0},{"id":29,"type":"text","x":175,"y":56,"width":14.5,"height":11,"text":"","fontSize":11,"fontFamily":"Malgun Gothic","fontWeight":"normal","fontStyle":"normal","textDecoration":"none","textAlign":"center","backgroundColor":"#ffffff","textColor":"#000000","borderColor":"#000000","borderWidth":0.5,"borderRadius":0,"verticalAlign":"center","textDirection":"horizontal","letterSpacing":0}],"createdAt":"2025-11-03T00:02:00.430Z","labelCount":24,"order":1};
+
         // 기본 템플릿 (삭제/순서 변경 가능)
         let defaultTemplates = [
             { id: 'label3629', type: 'label3629', name: '라벨 3629 (정부문서화일)', isDefault: true, labelCount: 10 },
@@ -4168,6 +4196,51 @@
             document.getElementById('saveTemplateModal').style.display = 'none';
         }
 
+        // 금형번호 엑셀 업로드 안내 모달 열기/닫기
+        function openMoldFileUploadModal() {
+            document.getElementById('moldFileUploadModal').style.display = 'flex';
+        }
+
+        function closeMoldFileUploadModal() {
+            document.getElementById('moldFileUploadModal').style.display = 'none';
+        }
+
+        // 기본 라벨 틀 자동 로드 ("라벨 3629" 계열 커스텀 템플릿 중 "V2"가 있으면 우선 사용)
+        function autoLoadBaseTemplate() {
+            try {
+                // 이 브라우저(localStorage)에 같은 이름으로 저장/수정된 최신 버전이 있으면 그것을 우선 사용하고,
+                // 없으면(특히 웹 서버로 처음 접속한 경우) 앱에 내장된 기본값을 커스텀 템플릿 목록에 등록한 뒤 사용한다.
+                // -> localStorage는 브라우저/PC마다 완전히 분리되어 있어, 내장 기본값이 없으면
+                //    다른 사람 브라우저에서는 이 라벨 틀 자체가 뜨지 않는다.
+                // -> customTemplates에 등록해 둬야 나중에 "저장(Ctrl+S)"으로 같은 템플릿에 덮어쓸 수 있다.
+                let target = customTemplates.find(t => t.name === BUILTIN_BASE_TEMPLATE.name);
+                let usedBuiltin = false;
+                if (!target) {
+                    target = JSON.parse(JSON.stringify(BUILTIN_BASE_TEMPLATE));
+                    customTemplates.push(target);
+                    saveCustomTemplates();
+                    renderAllTemplates();
+                    usedBuiltin = true;
+                }
+
+                loadCustomTemplateInternal(target);
+                console.log('✅ 기본 라벨 틀 자동 로드:', target.name, usedBuiltin ? '(내장 기본값 등록)' : '(브라우저에 저장된 버전)');
+            } catch (e) {
+                console.error('❌ 기본 라벨 틀 자동 로드 실패, 대체 템플릿 사용:', e);
+                try {
+                    createLabel3629Template();
+                    currentTemplateId = 'label3629';
+                    currentTemplateType = 'default';
+                    currentLayoutId = null;
+                    currentLayoutType = null;
+                    updateLabelCount();
+                    saveHistory();
+                } catch (e2) {
+                    console.error('❌ 대체 템플릿 로드도 실패:', e2);
+                }
+            }
+        }
+
         // 템플릿 저장 확인
         function confirmSaveTemplate() {
             const name = document.getElementById('templateName').value.trim();
@@ -4858,7 +4931,7 @@
             updateMoldLabelStatus();
 
             // 현재 템플릿 추적
-            currentTemplateId = templateId;
+            currentTemplateId = template.id;
             currentTemplateType = 'custom';
             currentLayoutId = null;
             currentLayoutType = null;
@@ -5488,6 +5561,114 @@
             } catch (e) {
                 console.error('금형 데이터 화면 업데이트 실패:', e);
             }
+        }
+
+        // 워크북에서 금형 데이터를 알림창 없이 조용히 파싱해 반영 (자동 로드 전용, Electron/웹 공용)
+        function applyMoldWorkbookSilently(workbook, sourceLabel) {
+            try {
+                let targetSheetName = workbook.SheetNames.find(name => name.includes('제공번호'));
+                if (!targetSheetName) targetSheetName = workbook.SheetNames[0];
+
+                const worksheet = workbook.Sheets[targetSheetName];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                if (jsonData.length <= 1) return false;
+
+                moldData = [];
+                moldNumbers = [];
+
+                // 헤더 행 찾기 (C열에 "년"이 있는 행)
+                let headerRowIndex = -1;
+                for (let i = 0; i < Math.min(jsonData.length, 20); i++) {
+                    const row = jsonData[i];
+                    if (row) {
+                        const colC = String(row[2] || '').trim().toLowerCase();
+                        if (colC.includes('년') || colC === 'year') {
+                            headerRowIndex = i;
+                            break;
+                        }
+                    }
+                }
+
+                // 헤더를 못 찾으면 금형번호 패턴으로 찾기
+                if (headerRowIndex === -1) {
+                    for (let i = 1; i < Math.min(jsonData.length, 20); i++) {
+                        const row = jsonData[i];
+                        if (row && row[3]) {
+                            const colD = String(row[3]).trim();
+                            if (/^\d{4,5}[A-Z]?/i.test(colD)) {
+                                headerRowIndex = i - 1;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (headerRowIndex === -1) headerRowIndex = 12;
+                const dataStartIndex = headerRowIndex + 1;
+
+                for (let i = dataStartIndex; i < jsonData.length; i++) {
+                    const row = jsonData[i];
+                    if (row && row[3]) {
+                        const moldNumber = String(row[3]).trim();
+                        const year = row[2] !== undefined && row[2] !== null && row[2] !== ''
+                            ? String(row[2]).trim() : '';
+                        const mpNumber = row[8] !== undefined && row[8] !== null && row[8] !== ''
+                            ? String(row[8]).trim() : '';
+
+                        if (moldNumber && moldNumber !== '') {
+                            moldData.push({
+                                생산년도: year,
+                                MP번호: mpNumber,
+                                차종: row[9] || '',
+                                ASSY명: row[10] || '',
+                                금형명: row[11] || '',
+                                금형번호: moldNumber,
+                                전체데이터: row
+                            });
+                            moldNumbers.push(moldNumber);
+                        }
+                    }
+                }
+
+                saveMoldDataToStorage();
+                updateMoldDataDisplay();
+
+                const statusEl = document.getElementById('fileStatus');
+                if (statusEl) {
+                    statusEl.textContent = `✓ ${moldData.length}개 금형 정보 자동 로드됨`;
+                    statusEl.style.color = '#4caf50';
+                }
+
+                console.log(`✅ 금형번호 엑셀 자동 로드 완료: ${moldData.length}개 금형 정보`, sourceLabel || '');
+
+                setTimeout(() => forceReactivateInputs(), 200);
+                return moldData.length > 0;
+            } catch (e) {
+                console.error('❌ 금형 워크북 파싱 실패:', e);
+                return false;
+            }
+        }
+
+        // 브라우저(Flask 웹 서버) 환경: 서버가 제공하는 금형번호.xlsm을 자동으로 불러오기 시도
+        function autoLoadMoldDataFromServer() {
+            fetch('mold-data-file')
+                .then(res => {
+                    if (!res.ok) throw new Error('서버에 금형번호.xlsm 파일이 없습니다.');
+                    return res.arrayBuffer();
+                })
+                .then(buffer => {
+                    const workbook = XLSX.read(new Uint8Array(buffer), { type: 'array' });
+                    applyMoldWorkbookSilently(workbook, '서버 자동 로드');
+                })
+                .catch(err => {
+                    console.log('⚠ 서버에서 금형번호.xlsm 자동 로드 실패:', err.message);
+                })
+                .finally(() => {
+                    setTimeout(() => {
+                        if (moldData.length === 0) openMoldFileUploadModal();
+                    }, 300);
+                });
         }
 
         // localStorage에서 금형 데이터 불러오기
@@ -7326,6 +7507,7 @@
             loadDefaultQuickLayouts(); // 기본 빠른 레이아웃 불러오기
             loadQuickLayouts(); // 저장된 빠른 레이아웃 불러오기
             loadMoldDataFromStorage(); // 저장된 금형 데이터 불러오기
+            autoLoadBaseTemplate(); // 기본 라벨 틀(라벨 3629 계열) 자동 로드
 
             // 입력 필드 영구 보호 시스템 초기화 (페이지 로드 시 즉시)
             initInputFieldGuard();
@@ -7372,96 +7554,7 @@
                         try {
                             const fileData = fs.readFileSync(excelPath);
                             const workbook = XLSX.read(fileData, { type: 'buffer' });
-
-                            // '제공번호' 시트 찾기 (없으면 첫 번째 시트 사용)
-                            let targetSheetName = workbook.SheetNames.find(name => name.includes('제공번호'));
-                            if (!targetSheetName) {
-                                targetSheetName = workbook.SheetNames[0];
-                            }
-                            console.log('📌 사용할 시트:', targetSheetName);
-
-                            const worksheet = workbook.Sheets[targetSheetName];
-                            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-                            if (jsonData.length > 1) {
-                                moldData = [];
-                                moldNumbers = [];
-
-                                // 헤더 행 찾기 (C열에 "년"이 있는 행)
-                                let headerRowIndex = -1;
-                                for (let i = 0; i < Math.min(jsonData.length, 20); i++) {
-                                    const row = jsonData[i];
-                                    if (row) {
-                                        const colC = String(row[2] || '').trim().toLowerCase();
-                                        if (colC.includes('년') || colC === 'year') {
-                                            headerRowIndex = i;
-                                            break;
-                                        }
-                                    }
-                                }
-
-                                // 헤더를 못 찾으면 금형번호 패턴으로 찾기
-                                if (headerRowIndex === -1) {
-                                    for (let i = 1; i < Math.min(jsonData.length, 20); i++) {
-                                        const row = jsonData[i];
-                                        if (row && row[3]) {
-                                            const colD = String(row[3]).trim();
-                                            if (/^\d{4,5}[A-Z]?/i.test(colD)) {
-                                                headerRowIndex = i - 1;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                }
-
-                                if (headerRowIndex === -1) headerRowIndex = 12;
-                                const dataStartIndex = headerRowIndex + 1;
-
-                                console.log('📊 헤더 행:', headerRowIndex, ', 데이터 시작:', dataStartIndex);
-
-                                for (let i = dataStartIndex; i < jsonData.length; i++) {
-                                    const row = jsonData[i];
-                                    if (row && row[3]) {
-                                        const moldNumber = String(row[3]).trim();
-                                        const year = row[2] !== undefined && row[2] !== null && row[2] !== ''
-                                            ? String(row[2]).trim() : '';
-                                        const mpNumber = row[8] !== undefined && row[8] !== null && row[8] !== ''
-                                            ? String(row[8]).trim() : '';
-
-                                        if (moldNumber && moldNumber !== '') {
-                                            moldData.push({
-                                                생산년도: year,
-                                                MP번호: mpNumber,
-                                                차종: row[9] || '',
-                                                ASSY명: row[10] || '',
-                                                금형명: row[11] || '',
-                                                금형번호: moldNumber,
-                                                전체데이터: row
-                                            });
-                                            moldNumbers.push(moldNumber);
-                                        }
-                                    }
-                                }
-
-                                saveMoldDataToStorage();
-                                updateMoldDataDisplay();
-
-                                // 상태 표시 업데이트
-                                const statusEl = document.getElementById('fileStatus');
-                                if (statusEl) {
-                                    statusEl.textContent = `✓ ${moldData.length}개 금형 정보 자동 로드됨`;
-                                    statusEl.style.color = '#4caf50';
-                                }
-
-                                excelLoaded = true;
-                                console.log(`✅ 금형번호 엑셀 자동 로드 완료: ${moldData.length}개 금형 정보`);
-
-                                // 자동 로드 후 입력 필드 강제 재활성화
-                                setTimeout(() => {
-                                    forceReactivateInputs();
-                                    console.log('✅ 자동 로드 후 입력 필드 재활성화 완료');
-                                }, 200);
-                            }
+                            excelLoaded = applyMoldWorkbookSilently(workbook, excelPath);
                         } catch (excelError) {
                             console.error('❌ 금형번호 엑셀 로드 실패:', excelError);
                         }
@@ -7482,21 +7575,31 @@
                 } catch (error) {
                     console.error('❌ Electron 환경에서 백업 파일 로드 실패:', error);
                 }
-            }
 
-            // localStorage가 비어있고 파일에서도 로드하지 못했으면 백업 복원 안내
-            if (!autoLoadedFromFile) {
-                const hasData = localStorage.getItem('labelDesignerCustomTemplates') ||
-                               localStorage.getItem('labelDesignerQuickLayouts') ||
-                               localStorage.getItem('labelDesignerMoldData');
+                // localStorage가 비어있고 파일에서도 로드하지 못했으면 백업 복원 안내
+                if (!autoLoadedFromFile) {
+                    const hasData = localStorage.getItem('labelDesignerCustomTemplates') ||
+                                   localStorage.getItem('labelDesignerQuickLayouts') ||
+                                   localStorage.getItem('labelDesignerMoldData');
 
-                if (!hasData) {
-                    setTimeout(() => {
-                        if (confirm('저장된 데이터가 없습니다.\n\n이전 백업 파일(label-designer-backup.json)을 불러오시겠습니까?\n\n※ 다른 컴퓨터에서 작업한 내용을 불러오려면 "확인"을 누르세요.')) {
-                            loadBackupFile();
-                        }
-                    }, 500);
+                    if (!hasData) {
+                        setTimeout(() => {
+                            if (confirm('저장된 데이터가 없습니다.\n\n이전 백업 파일(label-designer-backup.json)을 불러오시겠습니까?\n\n※ 다른 컴퓨터에서 작업한 내용을 불러오려면 "확인"을 누르세요.')) {
+                                loadBackupFile();
+                            }
+                        }, 500);
+                    }
                 }
+
+                // 금형번호 데이터를 어떤 경로로도 불러오지 못했으면 업로드 안내 모달 표시
+                if (moldData.length === 0) {
+                    setTimeout(() => {
+                        openMoldFileUploadModal();
+                    }, 700);
+                }
+            } else {
+                // 브라우저(Flask 웹 서버) 환경: 서버가 제공하는 금형번호.xlsm 자동 로드 시도
+                autoLoadMoldDataFromServer();
             }
 
             // 우클릭 메뉴 닫기 (클릭 시)

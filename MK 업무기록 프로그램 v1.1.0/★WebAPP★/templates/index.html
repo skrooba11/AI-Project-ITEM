@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MK 업무기록 프로그램 (웹)</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- 로그인 오버레이 -->
+<div id="login-overlay" class="overlay hidden">
+  <div class="overlay-box">
+    <h2>MK 업무기록 프로그램</h2>
+    <p>사용하실 이름(또는 사번)을 입력해주세요. 비밀번호는 없으며, 이름별로 기록이 분리되어 저장됩니다.</p>
+    <input id="login-name" type="text" maxlength="20" placeholder="이름 입력">
+    <button id="login-btn" class="btn btn-blue">시작하기</button>
+    <p id="login-error" class="error-text"></p>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+  <header class="topbar">
+    <div id="current-time" class="current-time"></div>
+    <div class="topbar-right">
+      <span id="user-name-label" class="user-name-label"></span>
+      <button id="logout-btn" class="btn btn-light btn-sm">사용자 변경</button>
+      <button id="help-btn" class="btn btn-light btn-sm">사용법</button>
+    </div>
+  </header>
+
+  <main class="main-layout">
+    <!-- 왼쪽: 업무 입력/제어 패널 -->
+    <section class="left-panel">
+      <div class="control-row">
+        <button id="reset-btn" class="btn btn-green btn-lg">RESET</button>
+        <button id="start-btn" class="btn btn-blue btn-lg">START</button>
+        <button id="end-btn" class="btn btn-red btn-lg">END</button>
+        <div class="duration-display">
+          <div class="duration-label">현재 업무 소요시간</div>
+          <div id="duration-value" class="duration-value">00 : 00</div>
+        </div>
+      </div>
+
+      <div id="status-label" class="status-label">업무 대기</div>
+
+      <div class="field-row">
+        <label>MK 번호</label>
+        <div class="mk-input-group">
+          <input id="mk-number" type="text" maxlength="6" placeholder="예: 25001M">
+          <button class="btn btn-mini" data-suffix="M">M</button>
+          <button class="btn btn-mini" data-suffix="T">T</button>
+          <button class="btn btn-mini" data-suffix="R">R</button>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <label>공정명</label>
+        <input id="category-input" type="text" list="category-list" placeholder="공정명 입력 또는 선택">
+        <datalist id="category-list"></datalist>
+      </div>
+
+      <div class="field-row">
+        <label>작업코드</label>
+        <select id="code-select">
+          <option value=""></option>
+        </select>
+      </div>
+
+      <div class="field-row task-row">
+        <label>업무내용</label>
+        <textarea id="task-input" rows="4" placeholder="업무 시작 전 내용을 입력하세요 (Ctrl+V 붙여넣기 가능)"></textarea>
+      </div>
+
+      <div class="favorites-grid" id="favorites-grid"></div>
+      <p class="hint-text">즐겨찾기 버튼을 우클릭하면 내용을 설정할 수 있습니다.</p>
+    </section>
+
+    <!-- 오른쪽: 업무기록 테이블 -->
+    <section class="right-panel">
+      <div class="panel-toolbar">
+        <button id="filter-toggle-btn" class="btn btn-light">전체 기록보기</button>
+        <button id="add-log-btn" class="btn btn-light">로그 추가</button>
+        <button id="edit-log-btn" class="btn btn-light">로그 편집</button>
+        <button id="delete-log-btn" class="btn btn-light">로그 삭제</button>
+        <button id="export-btn" class="btn btn-light">엑셀 내보내기</button>
+      </div>
+      <div class="table-wrap">
+        <table id="log-table">
+          <thead>
+            <tr>
+              <th class="col-check"><input type="checkbox" id="log-select-all"></th>
+              <th id="th-date" class="sortable">날짜</th>
+              <th>시작시간</th>
+              <th>완료시간</th>
+              <th>코드</th>
+              <th>MK번호</th>
+              <th>공정명</th>
+              <th>업무내용</th>
+              <th>소요시간</th>
+            </tr>
+          </thead>
+          <tbody id="log-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="panel-toolbar todo-toolbar">
+        <h3>해야할 업무</h3>
+        <button id="add-todo-btn" class="btn btn-light">추가</button>
+        <button id="edit-todo-btn" class="btn btn-light">편집</button>
+        <button id="delete-todo-btn" class="btn btn-light">삭제</button>
+        <button id="toggle-important-btn" class="btn btn-light">중요 토글</button>
+      </div>
+      <div class="table-wrap todo-table-wrap">
+        <table id="todo-table">
+          <thead>
+            <tr>
+              <th class="col-check"><input type="checkbox" id="todo-select-all"></th>
+              <th class="col-important">중요</th>
+              <th>해야할 업무</th>
+              <th id="th-created" class="sortable">등록일</th>
+              <th id="th-deadline" class="sortable">기한</th>
+              <th id="th-dday" class="sortable">D-day</th>
+            </tr>
+          </thead>
+          <tbody id="todo-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- 로그 추가/편집 모달 -->
+<div id="log-modal" class="overlay hidden">
+  <div class="overlay-box wide">
+    <h2 id="log-modal-title">로그 추가</h2>
+    <div class="modal-grid">
+      <fieldset>
+        <legend>날짜</legend>
+        <input id="lm-year" type="number" placeholder="년" class="w-70">
+        <input id="lm-month" type="number" placeholder="월" class="w-50" min="1" max="12">
+        <input id="lm-day" type="number" placeholder="일" class="w-50" min="1" max="31">
+      </fieldset>
+      <fieldset>
+        <legend>시작시간</legend>
+        <input id="lm-sh" type="number" placeholder="시" class="w-50" min="0" max="23">
+        <input id="lm-sm" type="number" placeholder="분" class="w-50" min="0" max="59">
+      </fieldset>
+      <fieldset>
+        <legend>완료시간</legend>
+        <input id="lm-eh" type="number" placeholder="시" class="w-50" min="0" max="23">
+        <input id="lm-em" type="number" placeholder="분" class="w-50" min="0" max="59">
+      </fieldset>
+      <fieldset>
+        <legend id="lm-duration-legend">소요시간 (자동 계산)</legend>
+        <input id="lm-dh" type="number" placeholder="시" class="w-50">
+        <input id="lm-dm" type="number" placeholder="분" class="w-50">
+        <input id="lm-ds" type="number" placeholder="초" class="w-50">
+      </fieldset>
+      <fieldset>
+        <legend>작업 정보</legend>
+        <select id="lm-code"><option value=""></option></select>
+        <div class="mk-input-group">
+          <input id="lm-mk" type="text" placeholder="MK번호" maxlength="6">
+          <button class="btn btn-mini" data-lm-suffix="M">M</button>
+          <button class="btn btn-mini" data-lm-suffix="T">T</button>
+          <button class="btn btn-mini" data-lm-suffix="R">R</button>
+        </div>
+        <input id="lm-category" type="text" list="category-list" placeholder="공정명">
+        <textarea id="lm-task" rows="4" placeholder="업무내용"></textarea>
+      </fieldset>
+    </div>
+    <p id="log-modal-error" class="error-text"></p>
+    <div class="modal-actions">
+      <button id="log-modal-save" class="btn btn-green">저장</button>
+      <button id="log-modal-cancel" class="btn btn-red">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- 즐겨찾기 설정 모달 -->
+<div id="fav-modal" class="overlay hidden">
+  <div class="overlay-box">
+    <h2 id="fav-modal-title">즐겨찾기 설정</h2>
+    <div class="field-row"><label>즐겨찾기명</label><input id="fav-name" maxlength="15"></div>
+    <div class="field-row">
+      <label>MK번호</label>
+      <div class="mk-input-group">
+        <input id="fav-mk" type="text" maxlength="6">
+        <button class="btn btn-mini" data-fav-suffix="M">M</button>
+        <button class="btn btn-mini" data-fav-suffix="T">T</button>
+        <button class="btn btn-mini" data-fav-suffix="R">R</button>
+      </div>
+    </div>
+    <div class="field-row"><label>공정명</label><input id="fav-category" list="category-list"></div>
+    <div class="field-row"><label>작업구분</label><select id="fav-code"><option value=""></option></select></div>
+    <div class="field-row task-row"><label>업무내용</label><textarea id="fav-task" rows="4"></textarea></div>
+    <p id="fav-modal-error" class="error-text"></p>
+    <div class="modal-actions">
+      <button id="fav-modal-save" class="btn btn-green">저장</button>
+      <button id="fav-modal-reset" class="btn btn-orange">초기화</button>
+      <button id="fav-modal-cancel" class="btn btn-red">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- 해야할 일 추가/편집 모달 -->
+<div id="todo-modal" class="overlay hidden">
+  <div class="overlay-box">
+    <h2 id="todo-modal-title">해야할 업무 등록</h2>
+    <div class="field-row">
+      <label>MK번호</label>
+      <div class="mk-input-group">
+        <input id="todo-mk" type="text" maxlength="6">
+        <button class="btn btn-mini" data-todo-suffix="M">M</button>
+        <button class="btn btn-mini" data-todo-suffix="T">T</button>
+        <button class="btn btn-mini" data-todo-suffix="R">R</button>
+      </div>
+    </div>
+    <div class="field-row"><label>공정명</label><input id="todo-category" list="category-list"></div>
+    <div class="field-row"><label>작업구분</label><select id="todo-code"><option value=""></option></select></div>
+    <div class="field-row"><label>기한</label><input id="todo-deadline" type="date"></div>
+    <div class="field-row task-row"><label>업무내용</label><textarea id="todo-task" rows="4"></textarea></div>
+    <p id="todo-modal-error" class="error-text"></p>
+    <div class="modal-actions">
+      <button id="todo-modal-save" class="btn btn-green">저장</button>
+      <button id="todo-modal-cancel" class="btn btn-red">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- 확인 모달 (confirm 대체) -->
+<div id="confirm-modal" class="overlay hidden">
+  <div class="overlay-box">
+    <p id="confirm-message"></p>
+    <div class="modal-actions">
+      <button id="confirm-ok" class="btn btn-blue">확인</button>
+      <button id="confirm-cancel" class="btn btn-light">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- 알림 모달 (alert 대체) -->
+<div id="alert-modal" class="overlay hidden">
+  <div class="overlay-box">
+    <p id="alert-message"></p>
+    <div class="modal-actions">
+      <button id="alert-ok" class="btn btn-blue">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- 사용법 모달 -->
+<div id="help-modal" class="overlay hidden">
+  <div class="overlay-box wide">
+    <h2>사용법</h2>
+    <div class="help-content">
+      <ul>
+        <li>업무내용을 입력한 뒤 <b>START</b>를 누르면 업무가 시작되고, 시작 전 입력한 업무내용은 종료 전까지 잠깁니다.</li>
+        <li>작업코드가 CAD/ET/KT인 경우 MK번호(5자리 숫자 + M/T/R)와 공정명이 필요하고, KC/TT는 공정명만 있으면 됩니다.</li>
+        <li><b>END</b>를 누르면 업무가 종료되고 오른쪽 표에 기록이 추가됩니다.</li>
+        <li><b>RESET</b>은 저장 없이 현재 입력/진행 상태를 초기화합니다.</li>
+        <li>즐겨찾기 버튼을 우클릭하면 자주 쓰는 코드/MK번호/공정명/업무내용을 저장해둘 수 있습니다.</li>
+        <li>표 상단의 "전체 기록보기"로 오늘 기록과 전체 기록을 전환할 수 있고, 날짜 헤더를 클릭하면 정렬 순서가 바뀝니다.</li>
+        <li>로그를 더블클릭하면 편집창이 열립니다. 여러 개 선택 후 삭제/엑셀 내보내기가 가능합니다.</li>
+        <li>해야할 업무의 "중요" 칸을 클릭하면 목록 상단에 고정됩니다.</li>
+      </ul>
+    </div>
+    <div class="modal-actions">
+      <button id="help-close" class="btn btn-blue">닫기</button>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

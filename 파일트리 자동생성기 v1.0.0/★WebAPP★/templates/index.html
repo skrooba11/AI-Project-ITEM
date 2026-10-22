@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>파일트리 자동생성기 (Web)</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header class="topbar">
+  <h1>📁 파일트리 자동생성기 <span class="ver">Web v1.0</span></h1>
+  <span class="dev">개발자: 이재호</span>
+</header>
+
+<main id="mainScreen" class="main-screen">
+  <section class="panel panel-left">
+    <h2>📋 저장된 템플릿</h2>
+    <ul id="templateList" class="template-list"></ul>
+    <div class="btn-row">
+      <button id="btnTplUp">↑ 위로</button>
+      <button id="btnTplDown">↓ 아래로</button>
+    </div>
+    <div class="btn-col">
+      <button id="btnNewTemplate">📝 새 템플릿 만들기</button>
+      <button id="btnEditTemplate">✏️ 템플릿 편집</button>
+      <button id="btnRenameTemplate">✏️ 이름 바꾸기</button>
+      <button id="btnDeleteTemplate" class="danger">🗑️ 템플릿 삭제</button>
+    </div>
+  </section>
+
+  <section class="panel panel-right">
+    <h2>🚀 파일트리 생성</h2>
+    <p id="selectedTemplateLabel" class="selected-label">선택된 템플릿: 없음</p>
+
+    <div class="field">
+      <label>생성될 최상위 폴더 이름 (ZIP 안에 이 이름의 폴더로 생성됩니다)</label>
+      <input id="rootNameInput" type="text" placeholder="예: 새프로젝트">
+    </div>
+
+    <button id="btnGenerate" class="primary big">🎯 파일트리 생성 (ZIP 다운로드)</button>
+
+    <div id="resultBox" class="result-box"></div>
+
+    <div class="info-box">
+      💡 사용법<br>
+      1. 왼쪽에서 템플릿을 선택하세요 (더블클릭으로 편집).<br>
+      2. 최상위 폴더 이름을 입력하세요.<br>
+      3. "파일트리 생성" 버튼을 누르면 ZIP 파일이 다운로드됩니다.<br>
+      4. 압축을 풀면 데스크톱 버전과 동일한 폴더/파일 구조가 만들어집니다.<br>
+      ※ 여러 사람이 같은 서버에 동시에 접속해 템플릿을 관리/생성할 수 있습니다.
+    </div>
+  </section>
+</main>
+
+<!-- 템플릿 편집기 오버레이 (데스크톱 버전의 TemplateEditor 창에 대응) -->
+<div id="editorOverlay" class="editor-overlay hidden">
+  <div class="editor-window">
+    <div class="editor-header">
+      <h2 id="editorTitle">새 템플릿</h2>
+      <button id="btnCloseEditor" class="close-btn">✕ 닫기</button>
+    </div>
+
+    <div class="editor-body">
+      <div class="editor-tree-panel">
+        <div class="tree-toolbar">구성 (클릭: 선택 · Ctrl/Shift+클릭: 다중선택 · 드래그: 이동 · 더블클릭: 폴더 접기/펼치기 · 우클릭: 메뉴)</div>
+        <div id="treeContainer" class="tree-container"></div>
+      </div>
+
+      <div class="editor-btn-panel">
+        <button id="btnAddFolder">📁 폴더 추가</button>
+        <button id="btnAddFile">📄 파일 추가</button>
+        <button id="btnImportFolder">📂 내PC에서 폴더 불러오기</button>
+        <button id="btnImportFiles">📋 내PC에서 파일 불러오기</button>
+        <input type="file" id="folderInput" webkitdirectory directory multiple class="hidden-input">
+        <input type="file" id="filesInput" multiple class="hidden-input">
+
+        <button id="btnRenameNode" disabled>✏️ 이름 바꾸기</button>
+        <button id="btnDeleteNode" disabled class="danger">🗑️ 삭제</button>
+
+        <div class="btn-row">
+          <button id="btnMoveUp">↑ 위로</button>
+          <button id="btnMoveDown">↓ 아래로</button>
+        </div>
+
+        <button id="btnSaveTemplate" class="primary big">💾 저장</button>
+
+        <div class="info-box small">
+          💡 사용법<br>
+          • Ctrl+클릭: 다중선택<br>
+          • Shift+클릭: 범위 선택<br>
+          • 더블클릭: 폴더 접기/펼치기<br>
+          • 드래그: 항목 이동(폴더 위에 놓으면 그 안으로 이동)<br>
+          • 우클릭: 이름변경/삭제/접기펼치기<br>
+          • 불러온 파일은 실제 내용까지 템플릿에 저장되어 어느 PC에서 생성하든 그대로 복원됩니다.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="contextMenu" class="context-menu hidden"></div>
+<div id="toast" class="toast hidden"></div>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

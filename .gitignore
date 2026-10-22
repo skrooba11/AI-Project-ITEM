@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+
+# Node / Electron 빌드
+node_modules/
+dist/
+
+# 실행파일 (용량이 커서 GitHub Releases로 배포)
+*.exe
+
+# 로그
+*.log
+
+# 비밀키 · 개인 데이터
+.secret_key
+**/★WebAPP★/data/
+
+# 업무 데이터 · 백업
+*.xlsm
+*.pkl
+label-designer-backup.json
+백업/
+
+# 로컬 설정 · 임시파일
+.claude/
+tmpclaude-*
+
+# 개인 즐겨찾기 · 할일 설정
+MK 업무기록 프로그램 v1.1.0/settings.json

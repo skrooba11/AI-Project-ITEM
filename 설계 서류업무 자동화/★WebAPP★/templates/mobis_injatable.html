@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOBIS 인자표 자동화</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tool.css') }}">
+</head>
+<body>
+<header><h1>MOBIS 인자표 자동화</h1><a href="/">&larr; 허브로 돌아가기</a></header>
+<main>
+  <form id="gen-form" class="card">
+    <div class="field-row">
+      <label>인자표 엑셀 파일 (.xlsx) *</label>
+      <input type="file" name="excel_file" accept=".xlsx" required>
+    </div>
+
+    <div class="section-title">사진</div>
+    <div class="field-row">
+      <label>전극사진 <span class="hint">(여러 장 선택 가능, 파일명 순서대로 C20부터 오른쪽에 배치)</span></label>
+      <input type="file" name="electrode_images" accept="image/*" multiple>
+    </div>
+    <div class="field-row">
+      <label>금형사진 <span class="hint">(여러 장 선택 가능, 파일명 순서대로 H58부터 오른쪽에 배치)</span></label>
+      <input type="file" name="mold_images" accept="image/*" multiple>
+    </div>
+    <div class="field-row">
+      <label>제품사진 <span class="hint">(C58에 배치)</span></label>
+      <input type="file" name="product_image" accept="image/*">
+    </div>
+
+    <button type="submit" id="submit-btn" class="btn">인자표 생성 &amp; 다운로드</button>
+    <div id="msg-area"></div>
+  </form>
+</main>
+
+<script src="{{ url_for('static', filename='js/upload-form.js') }}"></script>
+<script>
+wireGenerateForm("gen-form", "/mobis-injatable/generate", "인자표 생성 & 다운로드");
+</script>
+</body>
+</html>

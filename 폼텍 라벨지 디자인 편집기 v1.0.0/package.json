@@ -1,0 +1,50 @@
+{
+  "name": "label-designer",
+  "version": "1.0.0",
+  "description": "폼텍 라벨지 디자인 편집기",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "build": {
+    "appId": "com.label.designer",
+    "productName": "폼텍 라벨 디자인 편집기",
+    "files": [
+      "main.js",
+      "폼텍 라벨 디자인 편집기.html",
+      "label-designer-backup.json",
+      "@금형번호.xlsm",
+      "node_modules/xlsx/**/*",
+      "icon.ico",
+      "icon.png"
+    ],
+    "asarUnpack": [
+      "node_modules/xlsx/**/*"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        "portable"
+      ],
+      "icon": "icon.ico",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "devDependencies": {
+    "electron": "^39.2.7",
+    "electron-builder": "^26.0.12"
+  },
+  "dependencies": {
+    "xlsx": "^0.18.5"
+  }
+}

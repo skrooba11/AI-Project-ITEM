@@ -1,0 +1,210 @@
+:root {
+  --bg: #f5f5f5;
+  --panel-bg: #F8F9FA;
+  --border: #d9dcdf;
+  --text: #333333;
+  --blue: #2196F3;
+  --green: #4CAF50;
+  --red: #f44336;
+  --orange: #FF9800;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "맑은 고딕", "Malgun Gothic", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.hidden { display: none !important; }
+
+/* ---------- 공용 버튼 ---------- */
+.btn {
+  border: none;
+  border-radius: 4px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  color: white;
+  background: #9e9e9e;
+}
+.btn:active { transform: translateY(1px); }
+.btn-blue { background: var(--blue); }
+.btn-green { background: var(--green); }
+.btn-red { background: var(--red); }
+.btn-orange { background: var(--orange); }
+.btn-light { background: #e0e0e0; color: #222; }
+.btn-sm { padding: 4px 10px; font-size: 12px; }
+.btn-lg { padding: 16px 22px; font-size: 15px; min-width: 90px; }
+.btn-mini { padding: 4px 8px; font-size: 12px; background: #e0e0e0; color: #222; }
+
+/* ---------- 로그인 오버레이 / 모달 ---------- */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+}
+.overlay-box {
+  background: white;
+  border-radius: 8px;
+  padding: 24px 28px;
+  width: 360px;
+  max-width: 92vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+}
+.overlay-box.wide { width: 640px; }
+.overlay-box h2 { margin-top: 0; }
+.overlay-box input[type=text], .overlay-box input[type=number], .overlay-box input[type=date] {
+  width: 100%; padding: 8px; margin: 6px 0; border: 1px solid var(--border); border-radius: 4px;
+}
+.overlay-box textarea {
+  width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px; resize: vertical;
+}
+.error-text { color: var(--red); min-height: 18px; font-size: 13px; white-space: pre-line; }
+.modal-actions { display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end; }
+
+.modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.modal-grid fieldset:last-child { grid-column: 1 / -1; }
+.modal-grid fieldset { border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; }
+.modal-grid fieldset input, .modal-grid fieldset select { margin: 3px 4px 3px 0; padding: 6px; }
+.w-50 { width: 50px !important; }
+.w-70 { width: 70px !important; }
+
+/* ---------- 상단바 ---------- */
+.topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--panel-bg);
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.current-time { font-weight: bold; }
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+.user-name-label { font-weight: bold; color: var(--blue); margin-right: 6px; }
+
+/* ---------- 레이아웃 ---------- */
+.main-layout {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  align-items: flex-start;
+}
+.left-panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  width: 360px;
+  flex-shrink: 0;
+}
+.right-panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.control-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.duration-display { margin-left: auto; text-align: center; }
+.duration-label { font-size: 12px; color: #2E7D32; }
+.duration-value { font-size: 18px; font-weight: bold; color: #2E7D32; }
+
+.status-label {
+  text-align: center;
+  font-weight: bold;
+  color: var(--blue);
+  padding: 8px;
+  margin-bottom: 12px;
+  border-radius: 4px;
+  background: white;
+  border: 1px solid var(--border);
+}
+.status-label.working { color: var(--red); }
+
+.field-row { margin-bottom: 12px; }
+.field-row label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 13px; }
+.field-row input[type=text], .field-row select, .field-row input[type=date] {
+  width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 14px;
+}
+.task-row textarea { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px; resize: vertical; }
+.task-row textarea:disabled { background: #eeeeee; color: #666; }
+
+.mk-input-group { display: flex; gap: 4px; }
+.mk-input-group input { flex: 1; }
+
+.favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 8px;
+}
+.fav-btn {
+  background: #e3f2fd;
+  border: 1px solid #90caf9;
+  border-radius: 4px;
+  padding: 10px 4px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: pre-line;
+  min-height: 54px;
+}
+.fav-btn:hover { background: #bbdefb; }
+.hint-text { font-size: 11px; color: #888; margin-top: 6px; }
+
+/* ---------- 테이블 ---------- */
+.panel-toolbar {
+  display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+}
+.panel-toolbar h3 { margin: 0 10px 0 0; }
+.todo-toolbar { margin-top: 6px; }
+
+.table-wrap {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: auto;
+  max-height: 340px;
+}
+.todo-table-wrap { max-height: 220px; }
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th {
+  position: sticky; top: 0;
+  background: #eef1f5;
+  border-bottom: 2px solid var(--border);
+  padding: 8px 6px;
+  text-align: center;
+  white-space: nowrap;
+}
+th.sortable { cursor: pointer; user-select: none; }
+th.sortable:hover { background: #dfe6ee; }
+tbody td { padding: 6px; border-bottom: 1px solid #eee; text-align: center; }
+tbody td.text-left { text-align: left; }
+tbody tr:hover { background: #f7fbff; }
+tbody tr.selected { background: #d6ebff; }
+.col-check { width: 34px; }
+.col-important { width: 50px; cursor: pointer; }
+
+#log-tbody td.task-cell, #todo-tbody td.task-cell {
+  max-width: 320px;
+  white-space: pre-wrap;
+  text-align: left;
+}
+
+@media (max-width: 900px) {
+  .main-layout { flex-direction: column; }
+  .left-panel { width: 100%; }
+  .modal-grid { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>저장공간 관리 프로그램</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <h1>저장공간 관리 프로그램</h1>
+    <div class="drive-controls">
+      <select id="driveSelect"></select>
+      <button id="analyzeBtn" class="btn btn-primary">▶ 분석 시작</button>
+      <button id="stopBtn" class="btn btn-ghost" hidden>■ 중지</button>
+    </div>
+  </header>
+
+  <div id="progressBar" class="progress-line" hidden>
+    <span id="progressText">분석 준비 중...</span>
+  </div>
+
+  <main class="content">
+    <section class="left">
+      <div class="card storage-card">
+        <div class="storage-top">
+          <div class="storage-percent" id="storagePercent">-</div>
+          <div class="storage-detail">
+            <div id="storageLabel">아직 분석하지 않았습니다</div>
+            <div id="storageBytes" class="muted"></div>
+          </div>
+        </div>
+        <div class="bar-track"><div id="storageBar" class="bar-fill"></div></div>
+      </div>
+
+      <h2 class="section-title">파일 형식별 용량</h2>
+      <div id="typeGrid" class="type-grid"></div>
+    </section>
+
+    <aside class="right">
+      <h2 class="section-title">빠른 정리</h2>
+      <button class="action-btn" data-action="trash">
+        <div><div class="action-title">휴지통</div><div class="action-sub">이 프로그램으로 삭제한 파일</div></div>
+        <div class="action-size" id="size-trash">0 B</div>
+      </button>
+      <button class="action-btn" data-action="old">
+        <div><div class="action-title">사용하지 않는 파일</div><div class="action-sub">지난 1년간 수정하지 않은 파일</div></div>
+        <div class="action-size" id="size-old">0 B</div>
+      </button>
+      <button class="action-btn" data-action="duplicates">
+        <div><div class="action-title">중복 파일</div><div class="action-sub">복사본이 있는 파일</div></div>
+        <div class="action-size" id="size-duplicates">0 B</div>
+      </button>
+      <button class="action-btn" data-action="large">
+        <div><div class="action-title">용량이 큰 파일</div><div class="action-sub">1GB보다 큰 파일</div></div>
+        <div class="action-size" id="size-large">0 B</div>
+      </button>
+
+      <button id="reportBtn" class="btn btn-primary btn-block">📊 삭제 이력 보고서 다운로드</button>
+      <button id="historyBtn" class="btn btn-ghost btn-block">🕑 최근 삭제 이력 보기</button>
+
+      <p class="hint">
+        삭제 버튼을 누르면 실제로는 이 프로그램 전용 휴지통(<code>~/.disk_manager_trash</code>)으로 이동합니다.
+        30일 후 자동 정리 대상이며, 휴지통 화면에서 언제든 복원하거나 영구 삭제할 수 있습니다.
+      </p>
+    </aside>
+  </main>
+</div>
+
+<div id="modalOverlay" class="modal-overlay" hidden>
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h3 id="modalTitle"></h3>
+        <div id="modalSubtitle" class="muted"></div>
+      </div>
+      <button id="modalClose" class="btn btn-ghost">닫기</button>
+    </div>
+    <div class="modal-toolbar">
+      <button id="modalSelectAll" class="btn btn-ghost btn-sm">전체 선택</button>
+      <button id="modalSelectDupOnly" class="btn btn-ghost btn-sm" hidden>복사본만 선택</button>
+      <button id="modalDeselectAll" class="btn btn-ghost btn-sm">선택 해제</button>
+      <span id="modalSelectionInfo" class="muted" style="margin-left:auto"></span>
+      <button id="modalPrimaryAction" class="btn btn-danger btn-sm">선택 삭제</button>
+      <button id="modalSecondaryAction" class="btn btn-danger-outline btn-sm" hidden>영구 삭제</button>
+    </div>
+    <div class="modal-body">
+      <table class="file-table">
+        <thead>
+          <tr><th></th><th>이름</th><th>경로</th><th>크기</th><th>수정일</th></tr>
+        </thead>
+        <tbody id="modalTableBody"></tbody>
+      </table>
+      <div id="modalEmpty" class="muted" style="padding:24px;text-align:center" hidden>표시할 파일이 없습니다.</div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

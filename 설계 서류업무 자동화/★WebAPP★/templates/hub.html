@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>설계 서류업무 자동화</title>
+<style>
+  :root { --border:#d9dcdf; --bg:#f5f5f5; --blue:#2196F3; --green:#4CAF50; --gray:#9e9e9e; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:"맑은 고딕","Malgun Gothic",Arial,sans-serif; background:var(--bg); color:#333; }
+  header { background:#F8F9FA; border-bottom:1px solid var(--border); padding:20px 24px; }
+  header h1 { margin:0; font-size:22px; }
+  header p { margin:6px 0 0; color:#666; font-size:13px; }
+  main { max-width:920px; margin:24px auto; padding:0 16px 60px; }
+  .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:16px; }
+  .card { background:white; border:1px solid var(--border); border-radius:10px; padding:20px; display:flex; flex-direction:column; }
+  .card h2 { font-size:16px; margin:0 0 8px; }
+  .card p { font-size:13px; color:#555; flex-grow:1; line-height:1.5; }
+  .badge { display:inline-block; font-size:11px; font-weight:bold; padding:3px 8px; border-radius:12px; margin-bottom:10px; width:fit-content; }
+  .badge.ready { background:#e8f5e9; color:#1b5e20; }
+  .badge.coming_soon { background:#fff8e1; color:#8a6100; }
+  .badge.exe_only { background:#fdecea; color:#b71c1c; }
+  .btn { display:block; text-align:center; text-decoration:none; border-radius:6px; padding:10px; font-weight:bold; margin-top:12px; }
+  .btn.ready { background:var(--blue); color:white; }
+  .btn.disabled { background:#e0e0e0; color:#888; pointer-events:none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>설계 서류업무 자동화</h1>
+  <p>엑셀/사진/PDF 자동 반영 도구 모음 &middot; http://192.168.134.130:8001</p>
+</header>
+<main>
+  <div class="grid">
+    {% for tool in tools %}
+    <div class="card">
+      <span class="badge {{ tool.status }}">
+        {% if tool.status == 'ready' %}사용 가능{% elif tool.status == 'coming_soon' %}준비 중{% else %}실행파일만 존재{% endif %}
+      </span>
+      <h2>{{ tool.name }}</h2>
+      <p>{{ tool.desc }}</p>
+      {% if tool.status == 'ready' %}
+        <a class="btn ready" href="/{{ tool.id }}">열기</a>
+      {% else %}
+        <span class="btn disabled">사용 불가</span>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</main>
+</body>
+</html>

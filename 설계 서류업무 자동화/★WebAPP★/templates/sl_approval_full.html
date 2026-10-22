@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SL 엑셀파일 승인원 자동화</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tool.css') }}">
+</head>
+<body>
+<header><h1>SL 엑셀파일 승인원 자동화</h1><a href="/">&larr; 허브로 돌아가기</a></header>
+<main>
+  <form id="gen-form" class="card">
+    <div class="field-row">
+      <label>승인원 엑셀 파일 (.xlsx, 15개 시트 이상) *</label>
+      <input type="file" name="excel_file" accept=".xlsx" required>
+    </div>
+
+    <div class="section-title">5시트 - 금형/전극사진</div>
+    <div class="field-row">
+      <label>금형사진 <span class="hint">(파일명이 1,2,3,4,5로 시작해야 각 위치에 매칭됩니다. 예: 1_금형상측.jpg)</span></label>
+      <input type="file" name="mold_images" accept="image/*" multiple>
+    </div>
+    <div class="field-row">
+      <label>전극사진 <span class="hint">(여러 장, J34부터 가로 나란히)</span></label>
+      <input type="file" name="electrode_images" accept="image/*" multiple>
+    </div>
+
+    <div class="section-title">13시트 - 습합사진</div>
+    <div class="field-row">
+      <label>습합사진 <span class="hint">(파일명이 1,2,3,4,5로 시작해야 각 위치에 매칭됩니다)</span></label>
+      <input type="file" name="fusion_images" accept="image/*" multiple>
+    </div>
+
+    <div class="section-title">11시트 - 제품 충진밸런스 숏츠사진</div>
+    <div class="field-row">
+      <label>충진밸런스 사진 <span class="hint">(파일명이 1,2,3,4로 시작하면 해당 위치에, 나머지는 빈 자리에 순서대로 채워집니다)</span></label>
+      <input type="file" name="balance_images" accept="image/*" multiple>
+    </div>
+
+    <div class="section-title">9/10시트 - 제품 3D스캐너 측정자료 (LH/RH)</div>
+    <div class="field-row">
+      <label>LH/RH PDF <span class="hint">(파일명에 "LH" 또는 "RH"가 포함되어야 합니다. 예: PRODUCT_LH.pdf)</span></label>
+      <input type="file" name="lhrh_pdfs" accept="application/pdf" multiple>
+    </div>
+
+    <div class="section-title">12시트 - 3차원 측정서</div>
+    <div class="field-row">
+      <label>3차원 측정서 PDF <span class="hint">(여러 파일 가능, 각 파일의 모든 페이지가 삽입됩니다)</span></label>
+      <input type="file" name="pdf3d_files" accept="application/pdf" multiple>
+    </div>
+
+    <div class="section-title">4시트 - 금형제작시방서</div>
+    <div class="field-row">
+      <label>금형제작시방서 이미지</label>
+      <input type="file" name="gold_guide_image" accept="image/*">
+    </div>
+
+    <div class="section-title">14/15시트 - 사출조건표 / 금형자재표</div>
+    <div class="field-row">
+      <label>사출조건표 엑셀 파일 <span class="hint">(시트 전체를 서식과 함께 그대로 반영)</span></label>
+      <input type="file" name="injection_excel" accept=".xlsx,.xls">
+    </div>
+    <div class="field-row">
+      <label>금형자재표 엑셀 파일 <span class="hint">(시트 전체를 서식과 함께 그대로 반영)</span></label>
+      <input type="file" name="material_excel" accept=".xlsx,.xls">
+    </div>
+
+    <button type="submit" id="submit-btn" class="btn">승인원 생성 &amp; 다운로드</button>
+    <div id="msg-area"></div>
+  </form>
+</main>
+
+<script src="{{ url_for('static', filename='js/upload-form.js') }}"></script>
+<script>
+wireGenerateForm("gen-form", "/sl-approval-full/generate", "승인원 생성 & 다운로드");
+</script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SL 웹서버 QCS 승인원 자동화</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tool.css') }}">
+</head>
+<body>
+<header><h1>SL 웹서버 QCS 승인원 자동화</h1><a href="/">&larr; 허브로 돌아가기</a></header>
+<main>
+  <form id="gen-form" class="card">
+    <div class="field-row">
+      <label>승인원 엑셀 파일 (.xlsx) *</label>
+      <input type="file" name="excel_file" accept=".xlsx" required>
+    </div>
+
+    <div class="section-title">3시트 - 명판사진</div>
+    <div class="field-row">
+      <label>금형 명판사진 <span class="hint">(여러 장, D4부터 가로 나란히)</span></label>
+      <input type="file" name="nameplate_images" accept="image/*" multiple>
+    </div>
+    <div class="field-row">
+      <label>핫런너 명판사진 <span class="hint">(여러 장, D31부터 가로 나란히)</span></label>
+      <input type="file" name="hotrunner_images" accept="image/*" multiple>
+    </div>
+
+    <div class="section-title">4시트 - 금형사진</div>
+    <div class="field-row">
+      <label>금형 열린사진 <span class="hint">(여러 장, D4부터 가로 나란히)</span></label>
+      <input type="file" name="mold_open_images" accept="image/*" multiple>
+    </div>
+    <div class="field-row">
+      <label>금형 닫힌사진 <span class="hint">(여러 장, D31부터 가로 나란히)</span></label>
+      <input type="file" name="mold_close_images" accept="image/*" multiple>
+    </div>
+
+    <div class="section-title">5시트 - 전극사진</div>
+    <div class="field-row">
+      <label>전극사진 <span class="hint">(여러 장, 4장씩 가로 배치 후 다음 줄)</span></label>
+      <input type="file" name="electrode_images" accept="image/*" multiple>
+    </div>
+
+    <div class="section-title">6시트 - 금형자재표</div>
+    <div class="field-row">
+      <label>금형자재표 엑셀 파일 <span class="hint">(시트 전체를 서식과 함께 그대로 반영)</span></label>
+      <input type="file" name="material_excel" accept=".xlsx,.xls">
+    </div>
+
+    <button type="submit" id="submit-btn" class="btn">승인원 생성 &amp; 다운로드</button>
+    <div id="msg-area"></div>
+  </form>
+</main>
+
+<script src="{{ url_for('static', filename='js/upload-form.js') }}"></script>
+<script>
+wireGenerateForm("gen-form", "/sl-qcs/generate", "승인원 생성 & 다운로드");
+</script>
+</body>
+</html>
